@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>INP Inventory Manager | PC Components</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+</head>
+
+<body>
+
+  <div class="blob shape-1"></div>
+  <div class="blob shape-2"></div>
+
+  <div class="app-container">
+    <header class="app-header glass-panel">
+      <h1><i class="fa-solid fa-microchip gradient-text"></i> INP Inventory</h1>
+      <p>Manage your PC Components effortlessly</p>
+    </header>
+
+    <main class="app-main">
+      <section class="form-section glass-panel">
+        <h2 id="form-title">Add New Component</h2>
+
+        <form id="component-form">
+          <input type="hidden" id="component-id">
+
+          <div class="form-group">
+            <label for="name">Component Name <span class="required">*</span></label>
+            <input type="text" id="name" placeholder="e.g. NVIDIA RTX 4090" required>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="category">Category <span class="required">*</span></label>
+              <select id="category" required>
+                <option value="" disabled selected>Select category...</option>
+                <option value="CPU">CPU</option>
+                <option value="GPU">GPU</option>
+                <option value="RAM">RAM</option>
+                <option value="Motherboard">Motherboard</option>
+                <option value="Storage">Storage</option>
+                <option value="PSU">Power Supply</option>
+                <option value="Case">Case</option>
+                <option value="Cooler">Cooling</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="price">Price ($) <span class="required">*</span></label>
+              <input type="number" id="price" step="0.01" min="0" placeholder="0.00" required>
+            </div>
+
+            <div class="form-group">
+              <label for="quantity">Quantity</label>
+              <input type="number" id="quantity" min="0" placeholder="0" value="0">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="description">Description</label>
+            <textarea id="description" rows="3" placeholder="Optional details..."></textarea>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" id="cancel-btn" class="btn btn-secondary hidden">Cancel Edit</button>
+            <button type="submit" id="submit-btn" class="btn btn-primary"><i class="fa-solid fa-plus"></i> Add
+              Component</button>
+          </div>
+
+          <div id="error-message" class="error-msg hidden"></div>
+          <div id="success-message" class="success-msg hidden"></div>
+        </form>
+      </section>
+
+      <section class="inventory-section">
+        <div class="inventory-header">
+          <h2><i class="fa-solid fa-box-open"></i> Current Inventory</h2>
+          <div class="search-bar">
+            <i class="fa-solid fa-search"></i>
+            <input type="text" id="search-input" placeholder="Search components...">
+          </div>
+        </div>
+
+        <div id="loading" class="loading-state">
+          <i class="fa-solid fa-circle-notch fa-spin"></i> Loading inventory...
+        </div>
+
+        <div id="components-grid" class="components-grid hidden">
+          <!-- Components will be rendered here dynamically -->
+        </div>
+
+        <div id="pagination-controls" class="pagination-controls hidden">
+          <button id="prev-page-btn" class="btn btn-secondary" disabled><i class="fa-solid fa-chevron-left"></i>
+            Previous</button>
+          <span id="page-indicator" class="page-indicator">Page 1 of 1</span>
+          <button id="next-page-btn" class="btn btn-secondary"><i class="fa-solid fa-chevron-right"></i> Next</button>
+        </div>
+
+        <div id="empty-state" class="empty-state hidden glass-panel">
+          <i class="fa-regular fa-folder-open"></i>
+          <h3>No components found</h3>
+          <p>Start by adding your first PC component using the form above.</p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="js/main.js"></script>
+</body>
+
+</html>
