@@ -1,0 +1,73 @@
+<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
+<head>
+<meta charset="utf-8">
+<style>
+  body { font-family: "Calibri", sans-serif; }
+  pre { background: #f4f4f4; padding: 10px; border: 1px solid #ddd; }
+  h2 { color: #2c3e50; }
+  h3 { color: #34495e; }
+</style>
+</head>
+<body>
+
+<p>Aquí tienes la versión actualizada con las dependencias agregadas:</p>
+<hr>
+
+<h2>CRUD de Inventario de Componentes de PC</h2>
+
+<h3>Configuración del proyecto</h3>
+<ul>
+<li>Inicializar package.json</li>
+<li>Instalar dependencias (express, sqlite3, sqlite, cors)</li>
+</ul>
+
+<p><strong>package.json:</strong></p>
+<pre><code>{
+  "name": "inp",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "test": "echo \"Error: no test specified\" &amp;&amp; exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "sqlite": "^5.1.1",
+    "sqlite3": "^6.0.1"
+  }
+}</code></pre>
+
+<h3>Backend</h3>
+<ul>
+<li>Crear db/database.js</li>
+<li>Crear server.js</li>
+<li>Crear utils/validators.js</li>
+<li>Crear controllers/itemController.js</li>
+<li>Crear routes/itemRoutes.js</li>
+</ul>
+
+<h3>Frontend</h3>
+<ul>
+<li>Crear public/index.html</li>
+<li>Crear public/css/style.css</li>
+<li>Crear public/js/main.js</li>
+</ul>
+
+<h3>Verificación y pruebas</h3>
+<ul>
+<li>Ejecutar la app localmente</li>
+<li>Probar CRUD con SQLite</li>
+<li>Probar validaciones</li>
+</ul>
+
+<hr>
+
+</body>
+</html>
