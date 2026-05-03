@@ -1,4 +1,107 @@
 document.addEventListener('DOMContentLoaded', () => {
+
+  const translations = {
+    en: {
+      appTitle: 'INP Inventory',
+      appSubtitle: 'Manage your PC Components effortlessly',
+      formTitleAdd: 'Add New Component',
+      formTitleEdit: 'Edit Component',
+      labelName: 'Component Name <span class="required">*</span>',
+      labelCategory: 'Category <span class="required">*</span>',
+      labelPrice: 'Price ($) <span class="required">*</span>',
+      labelQuantity: 'Quantity',
+      labelDesc: 'Description',
+      btnCancel: 'Cancel Edit',
+      btnAdd: 'Add Component',
+      btnUpdate: 'Update Component',
+      inventoryTitle: 'Current Inventory',
+      loading: 'Loading inventory...',
+      btnPrev: 'Previous',
+      btnNext: 'Next',
+      emptyTitle: 'No components found',
+      emptyDesc: 'Start by adding your first PC component using the form above.',
+      optSelect: 'Select category...',
+      optMotherboard: 'Motherboard',
+      optStorage: 'Storage',
+      optPSU: 'Power Supply',
+      optCase: 'Case',
+      optCooler: 'Cooling',
+      optOther: 'Other',
+      placeholderName: 'e.g. NVIDIA RTX 4090',
+      placeholderDesc: 'Optional details...',
+      placeholderSearch: 'Search components...',
+      stockOut: 'Out of Stock',
+      stockIn: 'in stock',
+      noDesc: 'No description provided.',
+      btnEdit: 'Edit',
+      btnDelete: 'Delete',
+      msgAdded: 'Component added successfully!',
+      msgUpdated: 'Component updated successfully!',
+      msgDeleted: 'Component deleted successfully',
+      msgConfirm: 'Are you sure you want to delete this component?',
+      catMotherboard: 'Motherboard',
+      catStorage: 'Storage',
+      catPSU: 'Power Supply',
+      catCase: 'Case',
+      catCooler: 'Cooling',
+      catOther: 'Other',
+      catCPU: 'CPU',
+      catGPU: 'GPU',
+      catRAM: 'RAM',
+      pageOf: 'Page {0} of {1}'
+    },
+    es: {
+      appTitle: 'Inventario INP',
+      appSubtitle: 'Gestiona tus Componentes de PC sin esfuerzo',
+      formTitleAdd: 'Añadir Nuevo Componente',
+      formTitleEdit: 'Editar Componente',
+      labelName: 'Nombre del Componente <span class="required">*</span>',
+      labelCategory: 'Categoría <span class="required">*</span>',
+      labelPrice: 'Precio ($) <span class="required">*</span>',
+      labelQuantity: 'Cantidad',
+      labelDesc: 'Descripción',
+      btnCancel: 'Cancelar Edición',
+      btnAdd: 'Añadir Componente',
+      btnUpdate: 'Actualizar Componente',
+      inventoryTitle: 'Inventario Actual',
+      loading: 'Cargando inventario...',
+      btnPrev: 'Anterior',
+      btnNext: 'Siguiente',
+      emptyTitle: 'No se encontraron componentes',
+      emptyDesc: 'Empieza añadiendo tu primer elemento usando el formulario.',
+      optSelect: 'Seleccionar categoría...',
+      optMotherboard: 'Placa Base',
+      optStorage: 'Almacenamiento',
+      optPSU: 'Fuente de Poder',
+      optCase: 'Gabinete (Case)',
+      optCooler: 'Refrigeración',
+      optOther: 'Otro',
+      placeholderName: 'ej. NVIDIA RTX 4090',
+      placeholderDesc: 'Detalles opcionales...',
+      placeholderSearch: 'Buscar componentes...',
+      stockOut: 'Agotado',
+      stockIn: 'en stock',
+      noDesc: 'Sin descripción.',
+      btnEdit: 'Editar',
+      btnDelete: 'Eliminar',
+      msgAdded: '¡Componente añadido exitosamente!',
+      msgUpdated: '¡Componente actualizado exitosamente!',
+      msgDeleted: 'Componente eliminado exitosamente',
+      msgConfirm: '¿Estás seguro de que deseas eliminar este componente?',
+      catMotherboard: 'Placa Base',
+      catStorage: 'Almacenamiento',
+      catPSU: 'Fuente de Poder',
+      catCase: 'Gabinete',
+      catCooler: 'Refrigeración',
+      catOther: 'Otro',
+      catCPU: 'CPU',
+      catGPU: 'GPU',
+      catRAM: 'RAM',
+      pageOf: 'Página {0} de {1}'
+    }
+  };
+
+  let currentLang = localStorage.getItem('inp_lang') || 'en';
   // DOM Elements
   const form = document.getElementById('component-form');
   const formTitle = document.getElementById('form-title');
@@ -17,6 +120,9 @@ document.addEventListener('DOMContentLoaded', () => {
   
   const errorMsg = document.getElementById('error-message');
   const successMsg = document.getElementById('success-message');
+
+  const btnEn = document.getElementById('lang-en');
+  const btnEs = document.getElementById('lang-es');
 
   // Form Fields
   const idInput = document.getElementById('component-id');
@@ -37,14 +143,17 @@ document.addEventListener('DOMContentLoaded', () => {
   // API Base URL
   const API_URL = '/api/components';
 
-  // Initialize
-  fetchComponents();
+  // Apply initially saved language
+  setLanguage(currentLang);
 
   // Event Listeners
   form.addEventListener('submit', handleFormSubmit);
   cancelBtn.addEventListener('click', resetForm);
   searchInput.addEventListener('input', handleSearch);
   
+  btnEn.addEventListener('click', () => setLanguage('en'));
+  btnEs.addEventListener('click', () => setLanguage('es'));
+
   prevPageBtn.addEventListener('click', () => {
     if (currentPage > 1) {
       currentPage--;
@@ -104,22 +213,26 @@ document.addEventListener('DOMContentLoaded', () => {
       card.className = 'component-card';
       
       const stockClass = item.quantity < 5 ? 'stock-low' : '';
-      const stockText = item.quantity === 0 ? 'Out of Stock' : `${item.quantity} in stock`;
+      const stockText = item.quantity === 0 ? translations[currentLang].stockOut : `${item.quantity} ${translations[currentLang].stockIn}`;
       
+      const displayDesc = item.description ? escapeHTML(item.description) : translations[currentLang].noDesc;
+      const t = translations[currentLang];
+      const displayCategory = t['cat' + item.category] || item.category;
+
       card.innerHTML = `
         <div class="card-header">
           <h3 class="card-title">${escapeHTML(item.name)}</h3>
-          <span class="card-category">${escapeHTML(item.category)}</span>
+          <span class="card-category">${escapeHTML(displayCategory)}</span>
         </div>
         <div class="card-price">$${Number(item.price).toFixed(2)}</div>
         <div class="card-stock ${stockClass}">${stockText}</div>
-        <div class="card-desc">${escapeHTML(item.description || 'No description provided.')}</div>
+        <div class="card-desc">${displayDesc}</div>
         <div class="card-actions">
           <button class="btn btn-edit edit-btn" data-id="${item.id}">
-            <i class="fa-solid fa-pen"></i> Edit
+            <i class="fa-solid fa-pen"></i> <span data-i18n="btnEdit">${t.btnEdit}</span>
           </button>
           <button class="btn btn-danger delete-btn" data-id="${item.id}">
-            <i class="fa-solid fa-trash"></i> Delete
+            <i class="fa-solid fa-trash"></i> <span data-i18n="btnDelete">${t.btnDelete}</span>
           </button>
         </div>
       `;
@@ -129,7 +242,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // Update Pagination UI
     if (data.length > ITEMS_PER_PAGE) {
       paginationControls.classList.remove('hidden');
-      pageIndicator.textContent = `Page ${currentPage} of ${totalPages}`;
+      const pageText = translations[currentLang].pageOf.replace('{0}', currentPage).replace('{1}', totalPages);
+      pageIndicator.textContent = pageText;
       prevPageBtn.disabled = currentPage === 1;
       nextPageBtn.disabled = currentPage === totalPages;
     } else {
@@ -183,7 +297,8 @@ document.addEventListener('DOMContentLoaded', () => {
         throw new Error(result.error || 'Operation failed');
       }
 
-      showSuccess(isEditing ? 'Component updated successfully!' : 'Component added successfully!');
+      const txtSuccess = isEditing ? translations[currentLang].msgUpdated : translations[currentLang].msgAdded;
+      showSuccess(txtSuccess);
       resetForm();
       fetchComponents();
 
@@ -199,8 +314,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!component) return;
 
     isEditing = true;
-    formTitle.textContent = 'Edit Component';
-    submitBtn.innerHTML = '<i class="fa-solid fa-save"></i> Update Component';
+    const t = translations[currentLang];
+    formTitle.textContent = t.formTitleEdit;
+    submitBtn.innerHTML = `<i class="fa-solid fa-save"></i> <span data-i18n="btnUpdate">${t.btnUpdate}</span>`;
     cancelBtn.classList.remove('hidden');
 
     idInput.value = component.id;
@@ -216,7 +332,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Delete Component
   async function deleteComponent(id) {
-    if (!confirm('Are you sure you want to delete this component?')) return;
+    if (!confirm(translations[currentLang].msgConfirm)) return;
 
     try {
       const response = await fetch(`${API_URL}/${id}`, {
@@ -228,7 +344,7 @@ document.addEventListener('DOMContentLoaded', () => {
         throw new Error(result.error || 'Failed to delete');
       }
 
-      showSuccess('Component deleted successfully');
+      showSuccess(translations[currentLang].msgDeleted);
       fetchComponents();
     } catch (error) {
       console.error('Delete Error:', error);
@@ -259,10 +375,10 @@ document.addEventListener('DOMContentLoaded', () => {
     form.reset();
     isEditing = false;
     idInput.value = '';
-    formTitle.textContent = 'Add New Component';
-    submitBtn.innerHTML = '<i class="fa-solid fa-plus"></i> Add Component';
+    const t = translations[currentLang];
+    formTitle.textContent = t.formTitleAdd;
+    submitBtn.innerHTML = `<i class="fa-solid fa-plus"></i> <span data-i18n="btnAdd">${t.btnAdd}</span>`;
     cancelBtn.classList.add('hidden');
-    // We do not hide messages here intentionally to let success stay briefly
   }
 
   function showLoading() {
@@ -303,4 +419,45 @@ document.addEventListener('DOMContentLoaded', () => {
       .replace(/"/g, '&quot;')
       .replace(/'/g, '&#039;');
   }
+
+  // Language translation runner
+  function setLanguage(lang) {
+    currentLang = lang;
+    localStorage.setItem('inp_lang', lang);
+
+    // Update active button state
+    if (lang === 'en') {
+      btnEn.classList.add('active');
+      btnEs.classList.remove('active');
+    } else {
+      btnEs.classList.add('active');
+      btnEn.classList.remove('active');
+    }
+
+    const t = translations[lang];
+
+    // Traverse all DOM elements looking for data-i18n
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.getAttribute('data-i18n');
+      if (t[key]) {
+        el.innerHTML = t[key]; // innerHTML supports nested span for required asterisks
+      }
+    });
+
+    // Replace placeholders
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+      const key = el.getAttribute('data-i18n-placeholder');
+      if (t[key]) {
+        el.placeholder = t[key];
+      }
+    });
+
+    // Re-render components grids safely to reflect translation
+    if (components.length === 0) {
+      fetchComponents(); // Fetch initial data if not yet loaded
+    } else {
+      renderComponents(currentDisplayData); 
+    }
+  }
+
 });
