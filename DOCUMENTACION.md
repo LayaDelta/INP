@@ -87,7 +87,7 @@ Para arrancar esta aplicación en cualquier otra máquina desde cero o tras desc
    ```
 3. **Inicia del Servicio local:**
    ```bash
-   node server.js
+   npm run dev
    ```
    *(Observarás el Output de confirmación: `Server is running on http://localhost:3000` e imprimirá la confirmación de seeding local si es la primera vez).*
 4. Ingresa a tu navegador a través de **http://localhost:3000** y disfruta de la aplicación terminada.
