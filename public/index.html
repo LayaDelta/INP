@@ -4,12 +4,85 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>INP Inventory Manager | PC Components</title>
+  <title>INP Store | PC Components</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <style>
+    /* Cart Sidebar Styles */
+    #cart-sidebar {
+      position: fixed;
+      right: -400px;
+      top: 0;
+      width: 350px;
+      height: 100vh;
+      background: rgba(20, 20, 25, 0.95);
+      backdrop-filter: blur(10px);
+      border-left: 1px solid rgba(255, 255, 255, 0.1);
+      z-index: 1000;
+      transition: right 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+      box-shadow: -5px 0 20px rgba(0,0,0,0.5);
+    }
+    #cart-sidebar.open {
+      right: 0;
+    }
+    .cart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      padding-bottom: 15px;
+      margin-bottom: 15px;
+    }
+    #close-cart {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+    .cart-items {
+      flex: 1;
+      overflow-y: auto;
+    }
+    .cart-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 8px;
+      margin-bottom: 10px;
+    }
+    .cart-item-info h4 {
+      margin: 0 0 5px 0;
+      font-size: 0.9rem;
+    }
+    .cart-item-price {
+      color: var(--primary);
+      font-weight: 600;
+    }
+    .cart-footer {
+      border-top: 1px solid rgba(255,255,255,0.1);
+      padding-top: 15px;
+    }
+    .cart-total {
+      display: flex;
+      justify-content: space-between;
+      font-size: 1.2rem;
+      font-weight: bold;
+      margin-bottom: 15px;
+    }
+    .remove-item {
+      color: var(--danger);
+      cursor: pointer;
+    }
+  </style>
 </head>
 
 <body>
@@ -20,104 +93,67 @@
   <div class="app-container">
     <header class="app-header glass-panel">
       <div class="header-content">
-        <h1><i class="fa-solid fa-microchip gradient-text"></i> <span data-i18n="appTitle">INP Inventory</span></h1>
-        <p data-i18n="appSubtitle">Manage your PC Components effortlessly</p>
+        <h1><i class="fa-solid fa-microchip gradient-text"></i> <span data-i18n="appTitle">INP Store</span></h1>
+        <p data-i18n="appSubtitle">Buy the best PC Components</p>
       </div>
-      <div class="lang-switcher">
-        <button id="lang-en" class="lang-btn active">EN</button>
-        <button id="lang-es" class="lang-btn">ES</button>
+      <div style="display: flex; gap: 15px; align-items: center;">
+        <button id="open-cart-btn" class="btn btn-secondary">
+          <i class="fa-solid fa-shopping-cart"></i> Cart (<span id="cart-count">0</span>)
+        </button>
+        <div id="auth-actions">
+          <!-- Populated by JS based on login status -->
+        </div>
+        <div class="lang-switcher">
+          <button id="lang-en" class="lang-btn active">EN</button>
+          <button id="lang-es" class="lang-btn">ES</button>
+        </div>
       </div>
     </header>
 
-    <main class="app-main">
-      <section class="form-section glass-panel">
-        <h2 id="form-title" data-i18n="formTitleAdd">Add New Component</h2>
-
-        <form id="component-form">
-          <input type="hidden" id="component-id">
-
-          <div class="form-group">
-            <label for="name" data-i18n="labelName">Component Name <span class="required">*</span></label>
-            <input type="text" id="name" placeholder="e.g. NVIDIA RTX 4090" data-i18n-placeholder="placeholderName" required>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label for="category" data-i18n="labelCategory">Category <span class="required">*</span></label>
-              <select id="category" required>
-                <option value="" disabled selected data-i18n="optSelect">Select category...</option>
-                <option value="CPU">CPU</option>
-                <option value="GPU">GPU</option>
-                <option value="RAM">RAM</option>
-                <option value="Motherboard" data-i18n="optMotherboard">Motherboard</option>
-                <option value="Storage" data-i18n="optStorage">Storage</option>
-                <option value="PSU" data-i18n="optPSU">Power Supply</option>
-                <option value="Case" data-i18n="optCase">Case</option>
-                <option value="Cooler" data-i18n="optCooler">Cooling</option>
-                <option value="Other" data-i18n="optOther">Other</option>
-              </select>
-            </div>
-
-            <div class="form-group">
-              <label for="price" data-i18n="labelPrice">Price ($) <span class="required">*</span></label>
-              <input type="number" id="price" step="0.01" min="0" placeholder="0.00" required>
-            </div>
-
-            <div class="form-group">
-              <label for="quantity" data-i18n="labelQuantity">Quantity</label>
-              <input type="number" id="quantity" min="0" placeholder="0" value="0">
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label for="description" data-i18n="labelDesc">Description</label>
-            <textarea id="description" rows="3" placeholder="Optional details..." data-i18n-placeholder="placeholderDesc"></textarea>
-          </div>
-
-          <div class="form-actions">
-            <button type="button" id="cancel-btn" class="btn btn-secondary hidden"><span data-i18n="btnCancel">Cancel Edit</span></button>
-            <button type="submit" id="submit-btn" class="btn btn-primary"><i class="fa-solid fa-plus"></i> <span data-i18n="btnAdd">Add Component</span></button>
-          </div>
-
-          <div id="error-message" class="error-msg hidden"></div>
-          <div id="success-message" class="success-msg hidden"></div>
-        </form>
-      </section>
-
+    <main class="app-main" style="display: block;">
       <section class="inventory-section">
         <div class="inventory-header">
-          <h2><i class="fa-solid fa-box-open"></i> <span data-i18n="inventoryTitle">Current Inventory</span></h2>
+          <h2><i class="fa-solid fa-tags"></i> <span data-i18n="inventoryTitle">Available Products</span></h2>
           <div class="search-bar">
             <i class="fa-solid fa-search"></i>
-            <input type="text" id="search-input" placeholder="Search components..." data-i18n-placeholder="placeholderSearch">
+            <input type="text" id="search-input" placeholder="Search..." data-i18n-placeholder="placeholderSearch">
           </div>
         </div>
 
         <div id="loading" class="loading-state">
-          <i class="fa-solid fa-circle-notch fa-spin"></i> <span data-i18n="loading">Loading inventory...</span>
+          <i class="fa-solid fa-circle-notch fa-spin"></i> <span data-i18n="loading">Loading products...</span>
         </div>
 
-        <div id="components-grid" class="components-grid hidden">
-          <!-- Components will be rendered here dynamically -->
-        </div>
-
-        <div id="pagination-controls" class="pagination-controls hidden">
-          <button id="prev-page-btn" class="btn btn-secondary" disabled><i class="fa-solid fa-chevron-left"></i>
-            <span data-i18n="btnPrev">Previous</span></button>
-          <span id="page-indicator" class="page-indicator">Page 1 of 1</span>
-          <button id="next-page-btn" class="btn btn-secondary"><span data-i18n="btnNext">Next</span> <i class="fa-solid fa-chevron-right"></i></button>
-        </div>
-
+        <div id="components-grid" class="components-grid hidden"></div>
+        
         <div id="empty-state" class="empty-state hidden glass-panel">
           <i class="fa-regular fa-folder-open"></i>
-          <h3 data-i18n="emptyTitle">No components found</h3>
-          <p data-i18n="emptyDesc">Start by adding your first PC component using the form above.</p>
+          <h3 data-i18n="emptyTitle">No products found</h3>
         </div>
       </section>
     </main>
   </div>
 
-  <script src="js/main.js"></script>
+  <!-- Cart Sidebar -->
+  <div id="cart-sidebar">
+    <div class="cart-header">
+      <h2>Your Cart</h2>
+      <button id="close-cart"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="cart-items" id="cart-items">
+      <!-- Cart items here -->
+    </div>
+    <div class="cart-footer">
+      <div class="cart-total">
+        <span>Total:</span>
+        <span id="cart-total-price">$0.00</span>
+      </div>
+      <button id="checkout-btn" class="btn btn-primary" style="width: 100%;">Proceed to Checkout</button>
+    </div>
+  </div>
+
+  <script src="js/db.js"></script>
+  <script src="js/store.js"></script>
 </body>
 
 </html>

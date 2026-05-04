@@ -13,7 +13,7 @@ async function getDbConnection() {
   // Enable foreign keys
   await db.exec('PRAGMA foreign_keys = ON;');
 
-  // Create table if it doesn't exist
+  // Create components table if it doesn't exist
   await db.exec(`
     CREATE TABLE IF NOT EXISTS components (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -24,6 +24,18 @@ async function getDbConnection() {
       description TEXT
     );
   `);
+
+  // Create users table
+  await db.exec(`
+    CREATE TABLE IF NOT EXISTS users (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      username TEXT UNIQUE NOT NULL,
+      email TEXT UNIQUE NOT NULL,
+      password TEXT NOT NULL,
+      role TEXT DEFAULT 'user'
+    );
+  `);
+
 
   // Seed data if table is empty
   const countRow = await db.get('SELECT COUNT(*) as count FROM components');
@@ -47,6 +59,20 @@ async function getDbConnection() {
     }
     await stmt.finalize();
     console.log('Database seeded with 10 real PC components.');
+  }
+
+  // Seed default admin
+  const countUsers = await db.get('SELECT COUNT(*) as count FROM users');
+  if (countUsers.count === 0) {
+    const bcrypt = require('bcryptjs');
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash('admin123', salt);
+    
+    await db.run(
+      'INSERT INTO users (username, email, password, role) VALUES (?, ?, ?, ?)',
+      ['admin', 'admin@inp.com', hashedPassword, 'admin']
+    );
+    console.log('Admin user seeded (admin@inp.com / admin123).');
   }
 
   return db;

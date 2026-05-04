@@ -3,6 +3,7 @@ const cors = require('cors');
 const path = require('path');
 const { getDbConnection } = require('./db/database');
 const itemRoutes = require('./routes/itemRoutes');
+const authRoutes = require('./routes/authRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -17,6 +18,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Routes
 app.use('/api/components', itemRoutes);
+app.use('/api/auth', authRoutes);
 
 // Database Initialization & Server Start
 async function startServer() {

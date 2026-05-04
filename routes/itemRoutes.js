@@ -7,12 +7,13 @@ const {
   updateComponent,
   deleteComponent
 } = require('../controllers/itemController');
+const { requireAuth, requireAdmin } = require('../middleware/authMiddleware');
 
 // Define routes for /api/components
-router.post('/', createComponent);            // Create
+router.post('/', requireAuth, requireAdmin, createComponent);            // Create
 router.get('/', getComponents);               // Read All
 router.get('/:id', getComponentById);         // Read Single
-router.put('/:id', updateComponent);          // Update
-router.delete('/:id', deleteComponent);       // Delete
+router.put('/:id', requireAuth, requireAdmin, updateComponent);          // Update
+router.delete('/:id', requireAuth, requireAdmin, deleteComponent);       // Delete
 
 module.exports = router;

@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checkout | INP Store</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <style>
+    .checkout-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      max-width: 1000px;
+      margin: 40px auto;
+    }
+    .checkout-panel {
+      padding: 2rem;
+      border-radius: var(--radius-lg);
+    }
+    .order-summary .cart-item {
+      display: flex;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      padding: 10px 0;
+    }
+    .order-total {
+      display: flex;
+      justify-content: space-between;
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 2px solid rgba(255,255,255,0.2);
+    }
+    @media (max-width: 768px) {
+      .checkout-container {
+        grid-template-columns: 1fr;
+      }
+    }
+    .payment-success {
+      text-align: center;
+      padding: 3rem;
+    }
+    .payment-success i {
+      font-size: 4rem;
+      color: #3b82f6; /* A nicer blue instead of green? Or var(--primary) */
+      color: var(--primary);
+      margin-bottom: 1rem;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="blob shape-1"></div>
+  <div class="blob shape-2"></div>
+
+  <div class="app-container">
+    <header class="app-header glass-panel">
+      <div class="header-content">
+        <h1><i class="fa-solid fa-credit-card gradient-text"></i> Secure Checkout</h1>
+      </div>
+      <div style="display: flex; gap: 15px; align-items: center;">
+        <a href="index.html" style="color: white; text-decoration: none;"><i class="fa-solid fa-arrow-left"></i> Back to Store</a>
+        <div class="lang-switcher">
+          <button id="lang-en" class="lang-btn active">EN</button>
+          <button id="lang-es" class="lang-btn">ES</button>
+        </div>
+      </div>
+    </header>
+
+    <main id="main-content">
+      <div class="checkout-container">
+        <!-- Order Summary -->
+        <div class="checkout-panel glass-panel order-summary">
+          <h2>Order Summary</h2>
+          <div id="checkout-items"></div>
+          <div class="order-total">
+            <span>Total to Pay:</span>
+            <span id="checkout-total">$0.00</span>
+          </div>
+        </div>
+
+        <!-- Payment Form -->
+        <div class="checkout-panel glass-panel">
+          <h2>Payment Method</h2>
+          <form id="payment-form">
+            <div class="form-group">
+              <label>Name on Card</label>
+              <input type="text" required placeholder="John Doe">
+            </div>
+            <div class="form-group">
+              <label>Card Number</label>
+              <input type="text" required placeholder="0000 0000 0000 0000" pattern="[0-9]{16}" title="16 digit card number">
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Expiry (MM/YY)</label>
+                <input type="text" required placeholder="12/25" pattern="[0-9]{2}/[0-9]{2}">
+              </div>
+              <div class="form-group">
+                <label>CVC</label>
+                <input type="text" required placeholder="123" pattern="[0-9]{3,4}">
+              </div>
+            </div>
+            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;"><i class="fa-solid fa-lock"></i> Pay Now</button>
+          </form>
+        </div>
+      </div>
+    </main>
+
+  </div>
+
+  <script src="js/db.js"></script>
+  <script src="js/checkout.js"></script>
+</body>
+
+</html>
