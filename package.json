@@ -3,9 +3,12 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "homepage": "https://LayaDelta.github.io/INP",
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js",
+    "predeploy": "npm install",
+    "deploy": "gh-pages -d public",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -19,5 +22,8 @@
     "jsonwebtoken": "^9.0.3",
     "sqlite": "^5.1.1",
     "sqlite3": "^6.0.1"
+  },
+  "devDependencies": {
+    "gh-pages": "^6.3.0"
   }
 }
