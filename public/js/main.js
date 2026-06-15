@@ -28,7 +28,8 @@ document.addEventListener('DOMContentLoaded', () => {
       optCooler: 'Cooling',
       optOther: 'Other',
       placeholderName: 'e.g. NVIDIA RTX 4090',
-      placeholderDesc: 'Optional details...',
+      placeholderDescEn: 'English details...',
+      placeholderDescEs: 'Spanish details (optional)...',
       placeholderSearch: 'Search components...',
       stockOut: 'Out of Stock',
       stockIn: 'in stock',
@@ -77,7 +78,8 @@ document.addEventListener('DOMContentLoaded', () => {
       optCooler: 'Refrigeración',
       optOther: 'Otro',
       placeholderName: 'ej. NVIDIA RTX 4090',
-      placeholderDesc: 'Detalles opcionales...',
+      placeholderDescEn: 'Detalles en inglés...',
+      placeholderDescEs: 'Detalles en español (opcional)...',
       placeholderSearch: 'Buscar componentes...',
       stockOut: 'Agotado',
       stockIn: 'en stock',
@@ -109,6 +111,20 @@ document.addEventListener('DOMContentLoaded', () => {
   const cancelBtn = document.getElementById('cancel-btn');
   const searchInput = document.getElementById('search-input');
   
+  // Edit Modal Elements
+  const editModal = document.getElementById('edit-modal');
+  const editForm = document.getElementById('edit-component-form');
+  const closeEditBtn = document.getElementById('close-modal-btn');
+  const cancelEditBtn = document.getElementById('edit-cancel-btn');
+  
+  const editIdInput = document.getElementById('edit-component-id');
+  const editNameInput = document.getElementById('edit-name');
+  const editCategoryInput = document.getElementById('edit-category');
+  const editPriceInput = document.getElementById('edit-price');
+  const editQuantityInput = document.getElementById('edit-quantity');
+  const editDescEnInput = document.getElementById('edit-description-en');
+  const editDescEsInput = document.getElementById('edit-description-es');
+  
   const componentsGrid = document.getElementById('components-grid');
   const loadingState = document.getElementById('loading');
   const emptyState = document.getElementById('empty-state');
@@ -130,7 +146,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const categoryInput = document.getElementById('category');
   const priceInput = document.getElementById('price');
   const quantityInput = document.getElementById('quantity');
-  const descInput = document.getElementById('description');
+  const descEnInput = document.getElementById('description_en');
+  const descEsInput = document.getElementById('description_es');
 
   let components = [];
   let currentDisplayData = [];
@@ -153,6 +170,14 @@ document.addEventListener('DOMContentLoaded', () => {
   
   btnEn.addEventListener('click', () => setLanguage('en'));
   btnEs.addEventListener('click', () => setLanguage('es'));
+
+  // Edit Modal Listeners
+  editForm.addEventListener('submit', handleEditSubmit);
+  closeEditBtn.addEventListener('click', closeEditModal);
+  cancelEditBtn.addEventListener('click', closeEditModal);
+  editModal.addEventListener('click', (e) => {
+    if (e.target === editModal) closeEditModal();
+  });
 
   prevPageBtn.addEventListener('click', () => {
     if (currentPage > 1) {
@@ -215,7 +240,8 @@ document.addEventListener('DOMContentLoaded', () => {
       const stockClass = item.quantity < 5 ? 'stock-low' : '';
       const stockText = item.quantity === 0 ? translations[currentLang].stockOut : `${item.quantity} ${translations[currentLang].stockIn}`;
       
-      const displayDesc = item.description ? escapeHTML(item.description) : translations[currentLang].noDesc;
+      const descKey = currentLang === 'en' ? 'description_en' : 'description_es';
+      const displayDesc = item[descKey] ? escapeHTML(item[descKey]) : translations[currentLang].noDesc;
       const t = translations[currentLang];
       const displayCategory = t['cat' + item.category] || item.category;
 
@@ -271,7 +297,8 @@ document.addEventListener('DOMContentLoaded', () => {
       category: categoryInput.value,
       price: priceInput.value,
       quantity: quantityInput.value,
-      description: descInput.value
+      description_en: descEnInput.value,
+      description_es: descEsInput.value
     };
 
     try {
@@ -308,26 +335,63 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Prepare form for editing
+  // Handle Edit Form Submit
+  async function handleEditSubmit(e) {
+    e.preventDefault();
+    hideMessages();
+
+    const id = editIdInput.value;
+    const componentData = {
+      name: editNameInput.value,
+      category: editCategoryInput.value,
+      price: editPriceInput.value,
+      quantity: editQuantityInput.value,
+      description_en: editDescEnInput.value,
+      description_es: editDescEsInput.value
+    };
+
+    try {
+      const response = await fetch(`${API_URL}/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(componentData)
+      });
+
+      if (!response.ok) {
+        const result = await response.json();
+        throw new Error(result.error || 'Update failed');
+      }
+
+      showSuccess(translations[currentLang].msgUpdated);
+      closeEditModal();
+      fetchComponents();
+    } catch (error) {
+      console.error('Update Error:', error);
+      showError(error.message);
+    }
+  }
+
+  // Prepare form for editing (Open Modal)
   function editComponent(id) {
     const component = components.find(c => c.id == id);
     if (!component) return;
 
-    isEditing = true;
-    const t = translations[currentLang];
-    formTitle.textContent = t.formTitleEdit;
-    submitBtn.innerHTML = `<i class="fa-solid fa-save"></i> <span data-i18n="btnUpdate">${t.btnUpdate}</span>`;
-    cancelBtn.classList.remove('hidden');
+    editIdInput.value = component.id;
+    editNameInput.value = component.name;
+    editCategoryInput.value = component.category;
+    editPriceInput.value = component.price;
+    editQuantityInput.value = component.quantity;
+    editDescEnInput.value = component.description_en || '';
+    editDescEsInput.value = component.description_es || '';
 
-    idInput.value = component.id;
-    nameInput.value = component.name;
-    categoryInput.value = component.category;
-    priceInput.value = component.price;
-    quantityInput.value = component.quantity;
-    descInput.value = component.description || '';
+    editModal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden'; // Prevent scrolling
+  }
 
-    // Scroll to form
-    document.querySelector('.form-section').scrollIntoView({ behavior: 'smooth' });
+  function closeEditModal() {
+    editModal.classList.add('hidden');
+    document.body.style.overflow = ''; // Restore scrolling
+    editForm.reset();
   }
 
   // Delete Component
@@ -362,7 +426,8 @@ document.addEventListener('DOMContentLoaded', () => {
       currentDisplayData = components.filter(c => 
         c.name.toLowerCase().includes(searchTerm) || 
         c.category.toLowerCase().includes(searchTerm) ||
-        (c.description && c.description.toLowerCase().includes(searchTerm))
+        (c.description_en && c.description_en.toLowerCase().includes(searchTerm)) ||
+        (c.description_es && c.description_es.toLowerCase().includes(searchTerm))
       );
     }
 
@@ -374,11 +439,9 @@ document.addEventListener('DOMContentLoaded', () => {
   function resetForm() {
     form.reset();
     isEditing = false;
-    idInput.value = '';
     const t = translations[currentLang];
     formTitle.textContent = t.formTitleAdd;
     submitBtn.innerHTML = `<i class="fa-solid fa-plus"></i> <span data-i18n="btnAdd">${t.btnAdd}</span>`;
-    cancelBtn.classList.add('hidden');
   }
 
   function showLoading() {

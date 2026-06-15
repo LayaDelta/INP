@@ -69,9 +69,15 @@
             </div>
           </div>
 
-          <div class="form-group">
-            <label for="description" data-i18n="labelDesc">Description</label>
-            <textarea id="description" rows="3" placeholder="Optional details..." data-i18n-placeholder="placeholderDesc"></textarea>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="description_en">Description (EN)</label>
+              <textarea id="description_en" rows="2" placeholder="English description..." data-i18n-placeholder="placeholderDescEn"></textarea>
+            </div>
+            <div class="form-group">
+              <label for="description_es">Descripción (ES)</label>
+              <textarea id="description_es" rows="2" placeholder="Descripción en español..." data-i18n-placeholder="placeholderDescEs"></textarea>
+            </div>
           </div>
 
           <div class="form-actions">
@@ -115,6 +121,65 @@
         </div>
       </section>
     </main>
+  </div>
+
+  <!-- Dedicated Edit Modal -->
+  <div id="edit-modal" class="modal-overlay hidden">
+    <div class="modal-content glass-panel animate-pop-in">
+      <div class="modal-header">
+        <h2 id="edit-form-title" data-i18n="formTitleEdit">Edit Component</h2>
+        <button id="close-modal-btn" class="close-btn">&times;</button>
+      </div>
+      <form id="edit-component-form">
+        <input type="hidden" id="edit-component-id">
+        
+        <div class="form-group">
+          <label for="edit-name" data-i18n="labelName">Component Name <span class="required">*</span></label>
+          <input type="text" id="edit-name" required>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="edit-category" data-i18n="labelCategory">Category <span class="required">*</span></label>
+            <select id="edit-category" required>
+              <option value="CPU">CPU</option>
+              <option value="GPU">GPU</option>
+              <option value="RAM">RAM</option>
+              <option value="Motherboard" data-i18n="optMotherboard">Motherboard</option>
+              <option value="Storage" data-i18n="optStorage">Storage</option>
+              <option value="PSU" data-i18n="optPSU">Power Supply</option>
+              <option value="Case" data-i18n="optCase">Case</option>
+              <option value="Cooler" data-i18n="optCooler">Cooling</option>
+              <option value="Other" data-i18n="optOther">Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="edit-price" data-i18n="labelPrice">Price ($) <span class="required">*</span></label>
+            <input type="number" id="edit-price" step="0.01" min="0" required>
+          </div>
+          <div class="form-group">
+            <label for="edit-quantity" data-i18n="labelQuantity">Quantity</label>
+            <input type="number" id="edit-quantity" min="0">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="edit-description-en">Description (EN)</label>
+            <textarea id="edit-description-en" rows="3"></textarea>
+          </div>
+          <div class="form-group">
+            <label for="edit-description-es">Descripción (ES)</label>
+            <textarea id="edit-description-es" rows="3"></textarea>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" id="edit-cancel-btn" class="btn btn-secondary"><span data-i18n="btnCancel">Cancel</span></button>
+          <button type="submit" class="btn btn-primary"><i class="fa-solid fa-save"></i> <span data-i18n="btnUpdate">Update Component</span></button>
+        </div>
+      </form>
+    </div>
   </div>
 
   <script src="js/main.js"></script>

@@ -8,12 +8,19 @@ async function createComponent(req, res) {
       return res.status(400).json({ error });
     }
 
-    const { name, category, quantity, price, description } = req.body;
+    const { name, category, quantity, price, description_en, description_es } = req.body;
     const db = req.app.locals.db;
 
     const result = await db.run(
-      'INSERT INTO components (name, category, quantity, price, description) VALUES (?, ?, ?, ?, ?)',
-      [name.trim(), category.trim(), parseInt(quantity || 0), parseFloat(price), description ? description.trim() : '']
+      'INSERT INTO components (name, category, quantity, price, description_en, description_es) VALUES (?, ?, ?, ?, ?, ?)',
+      [
+        name.trim(), 
+        category.trim(), 
+        parseInt(quantity || 0), 
+        parseFloat(price), 
+        description_en ? description_en.trim() : '',
+        description_es ? description_es.trim() : ''
+      ]
     );
 
     res.status(201).json({ id: result.lastID, message: 'Component created successfully' });
@@ -70,11 +77,19 @@ async function updateComponent(req, res) {
       return res.status(400).json({ error });
     }
 
-    const { name, category, quantity, price, description } = req.body;
+    const { name, category, quantity, price, description_en, description_es } = req.body;
 
     await db.run(
-      'UPDATE components SET name = ?, category = ?, quantity = ?, price = ?, description = ? WHERE id = ?',
-      [name.trim(), category.trim(), parseInt(quantity || 0), parseFloat(price), description ? description.trim() : '', id]
+      'UPDATE components SET name = ?, category = ?, quantity = ?, price = ?, description_en = ?, description_es = ? WHERE id = ?',
+      [
+        name.trim(), 
+        category.trim(), 
+        parseInt(quantity || 0), 
+        parseFloat(price), 
+        description_en ? description_en.trim() : '', 
+        description_es ? description_es.trim() : '',
+        id
+      ]
     );
 
     res.status(200).json({ message: 'Component updated successfully' });
