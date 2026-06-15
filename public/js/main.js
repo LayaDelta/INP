@@ -122,8 +122,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const editCategoryInput = document.getElementById('edit-category');
   const editPriceInput = document.getElementById('edit-price');
   const editQuantityInput = document.getElementById('edit-quantity');
-  const editDescEnInput = document.getElementById('edit-description-en');
-  const editDescEsInput = document.getElementById('edit-description-es');
+  const editDescInput = document.getElementById('edit-description');
   
   const componentsGrid = document.getElementById('components-grid');
   const loadingState = document.getElementById('loading');
@@ -146,8 +145,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const categoryInput = document.getElementById('category');
   const priceInput = document.getElementById('price');
   const quantityInput = document.getElementById('quantity');
-  const descEnInput = document.getElementById('description_en');
-  const descEsInput = document.getElementById('description_es');
+  const descInput = document.getElementById('description');
 
   let components = [];
   let currentDisplayData = [];
@@ -159,6 +157,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // API Base URL
   const API_URL = '/api/components';
+
+  // Translation Icon
+  const translateIcon = '<i class="fa-solid fa-wand-magic-sparkles"></i>';
 
   // Apply initially saved language
   setLanguage(currentLang);
@@ -193,6 +194,8 @@ document.addEventListener('DOMContentLoaded', () => {
       renderComponents(currentDisplayData);
     }
   });
+
+  // Auto-translation listeners removed - now handled on submit for better UX
 
   // Fetch components from API
   async function fetchComponents() {
@@ -291,47 +294,50 @@ document.addEventListener('DOMContentLoaded', () => {
     e.preventDefault();
     hideMessages();
 
-    // Prepare data
+    // Automatic Translation Logic
+    const descValue = descInput.value.trim();
+    let description_en = '';
+    let description_es = '';
+
+    if (descValue) {
+      setBtnLoading(submitBtn, true);
+      const isEn = currentLang === 'en';
+      description_en = isEn ? descValue : await translateText(descValue, 'es', 'en');
+      description_es = isEn ? await translateText(descValue, 'en', 'es') : descValue;
+    }
+
     const componentData = {
       name: nameInput.value,
       category: categoryInput.value,
       price: priceInput.value,
       quantity: quantityInput.value,
-      description_en: descEnInput.value,
-      description_es: descEsInput.value
+      description_en,
+      description_es
     };
 
     try {
       let url = API_URL;
       let method = 'POST';
 
-      if (isEditing) {
-        url = `${API_URL}/${idInput.value}`;
-        method = 'PUT';
-      }
-
       const response = await fetch(url, {
         method: method,
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(componentData)
       });
 
       const result = await response.json();
 
-      if (!response.ok) {
-        throw new Error(result.error || 'Operation failed');
-      }
+      if (!response.ok) throw new Error(result.error || 'Operation failed');
 
-      const txtSuccess = isEditing ? translations[currentLang].msgUpdated : translations[currentLang].msgAdded;
-      showSuccess(txtSuccess);
+      showSuccess(translations[currentLang].msgAdded);
       resetForm();
       fetchComponents();
 
     } catch (error) {
       console.error('Submit Error:', error);
       showError(error.message);
+    } finally {
+      setBtnLoading(submitBtn, false);
     }
   }
 
@@ -340,14 +346,27 @@ document.addEventListener('DOMContentLoaded', () => {
     e.preventDefault();
     hideMessages();
 
-    const id = editIdInput.value;
+    // Automatic Translation Logic
+    const descValue = editDescInput.value.trim();
+    let description_en = '';
+    let description_es = '';
+
+    const editSubmitBtn = editForm.querySelector('button[type="submit"]');
+
+    if (descValue) {
+      setBtnLoading(editSubmitBtn, true);
+      const isEn = currentLang === 'en';
+      description_en = isEn ? descValue : await translateText(descValue, 'es', 'en');
+      description_es = isEn ? await translateText(descValue, 'en', 'es') : descValue;
+    }
+
     const componentData = {
       name: editNameInput.value,
       category: editCategoryInput.value,
       price: editPriceInput.value,
       quantity: editQuantityInput.value,
-      description_en: editDescEnInput.value,
-      description_es: editDescEsInput.value
+      description_en,
+      description_es
     };
 
     try {
@@ -368,6 +387,8 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch (error) {
       console.error('Update Error:', error);
       showError(error.message);
+    } finally {
+      setBtnLoading(editSubmitBtn, false);
     }
   }
 
@@ -381,8 +402,8 @@ document.addEventListener('DOMContentLoaded', () => {
     editCategoryInput.value = component.category;
     editPriceInput.value = component.price;
     editQuantityInput.value = component.quantity;
-    editDescEnInput.value = component.description_en || '';
-    editDescEsInput.value = component.description_es || '';
+    const descKey = currentLang === 'en' ? 'description_en' : 'description_es';
+    editDescInput.value = component[descKey] || '';
 
     editModal.classList.remove('hidden');
     document.body.style.overflow = 'hidden'; // Prevent scrolling
@@ -470,6 +491,33 @@ document.addEventListener('DOMContentLoaded', () => {
   function hideMessages() {
     errorMsg.classList.add('hidden');
     successMsg.classList.add('hidden');
+  }
+
+  async function autoTranslate(sourceEl, targetEl, from, to) {
+    // Legacy function - kept empty for compatibility if needed elsewhere
+  }
+
+  function setBtnLoading(btn, isLoading) {
+    if (isLoading) {
+      btn.dataset.originalContent = btn.innerHTML;
+      btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> ' + (currentLang === 'en' ? 'Translating...' : 'Traduciendo...');
+      btn.disabled = true;
+    } else {
+      btn.innerHTML = btn.dataset.originalContent;
+      btn.disabled = false;
+    }
+  }
+
+  async function translateText(text, from, to) {
+    try {
+      const response = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${from}|${to}`);
+      const data = await response.json();
+      if (data.responseData && data.responseData.translatedText) {
+        return data.responseData.translatedText;
+      }
+    } catch (error) {
+      return null;
+    }
   }
 
   function escapeHTML(str) {
