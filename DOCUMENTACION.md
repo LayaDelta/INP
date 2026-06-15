@@ -1,93 +1,97 @@
-# INP - Inventario de Componentes de PC
+# INP - Inventario Pro de Componentes de PC (Bilingüe + IA)
 
 ## 📖 Descripción General
-**INP** (Inventory Manager) es una aplicación web de ciclo completo (Full-Stack) diseñada para la gestión, control y registro de componentes de computadoras. 
+**INP** es una plataforma de gestión de inventario para hardware de alto rendimiento. Esta aplicación Full-Stack destaca por su enfoque internacional, permitiendo gestionar existencias en **Inglés y Español** de forma simultánea. 
 
-El proyecto implementa operaciones **CRUD** (Crear, Leer, Actualizar, Borrar) y cuenta con una arquitectura dividida donde un backend en **Node.js + Express** despacha datos en formato JSON a través de una base de datos relacional ligera **SQLite**, que es consumida interactivamente por un Frontend nativo implementado con **Vanilla HTML, JS y CSS**. El diseño destaca por un elegante acabado premium *"Glassmorphism"*, responsividad en todo momento y modo súper oscuro enfocado en hardware.
+Gracias a la integración de inteligencia artificial para traducciones y una interfaz inspirada en el minimalismo moderno (*Glassmorphism*), INP ofrece una experiencia de usuario fluida, rápida y profesional.
 
 ---
 
 ## 🛠️ Stack Tecnológico
-* **Backend:** Node.js, Express.js.
-* **Base de Datos:** SQLite (`sqlite3` y paquete wrapper de promesas `sqlite`).
-* **Frontend:** HTML5 semántico, Vanilla JavaScript (con promesas a la Fetch API), CSS3 nativo (CSS Variables, Flexbox, y CSS Grid).
-* **Fuentes e Iconos:** Fuente oficial *Inter* de Google Fonts y set de iconos de *FontAwesome*.
+*   **Backend:** Node.js 20 LTS, Express.js.
+*   **Base de Datos:** SQLite v2 (`inventory_v2.db`) para máxima portabilidad y rendimiento ligero.
+*   **Inteligencia Artificial:** Integración de la API MyMemory para traducción automática de descripciones en tiempo real.
+*   **Frontend:** Vanilla Architecture (HTML5, JS, CSS3) con enfoque en Single-Page Application (SPA).
+*   **Estética:** Google Fonts (Inter), FontAwesome 6, y efectos avanzados de desenfoque y graduado radial.
 
 ---
 
-## 📂 Arquitectura de Archivos y Carpetas
+## 🌟 Funcionalidades Premium
 
-La arquitectura del proyecto sigue el popular estándar de separación de capas lógicas:
+### 1. Sistema Bilingüe Nativo (EN/ES)
+La aplicación no solo traduce la interfaz, sino que gestiona contenido bilingüe real. Cada componente almacena descripciones independientes para inglés y español en la base de datos, asegurando que tu catálogo sea profesional en ambos idiomas.
 
+### 2. Traducción Automática por IA
+¡Escribe una sola vez! Al añadir o editar un componente, la aplicación detecta el idioma actual y traduce automáticamente la descripción al idioma opuesto en segundo plano. Incluye estados de carga visuales y manejo de errores.
+
+### 3. Modal de Edición "Focus Mode"
+Hemos separado la creación de la edición. Al editar, se activa un modal con efecto *Glassmorphism* y desenfoque de fondo que permite concentrarte en los cambios del producto sin perder el contexto de tu inventario.
+
+### 4. Base de Datos v2 con Catálogo Expandido
+El sistema incluye una base de datos auto-generada con **25 productos reales** de alta gama (CPUs, GPUs, periféricos de última generación) para que el inventario se vea poblado y profesional desde el despliegue inicial.
+
+### 5. Estética y Animaciones
+*   **Glassmorphism:** Paneles traslúcidos con bordes brillantes.
+*   **Micro-interacciones:** Animaciones `pop-in` para modales y efectos de elevación en tarjetas.
+*   **Responsive Pro:** Optimizado para monitores ultrawide y dispositivos móviles.
+
+---
+
+## 📂 Arquitectura de Archivos
 ```text
 INP/
-├── package.json               # Dependencias del proyecto y metadatos
-├── server.js                  # Punto de entrada y configuración del servidor Express
+├── server.js                  # Servidor Express y despacho de estáticos
 ├── db/
-│   ├── database.js            # Configuración de SQLite, SQL de Tablas, y Auto-Populación
-│   └── inventory.db           # Base de datos relacional (Generada Automáticamente)
+│   ├── database.js            # Lógica de creación, migración v2 y seeding bilingüe
+│   └── inventory_v2.db        # Base de datos activa (SQLite)
 ├── controllers/
-│   └── itemController.js      # Lógica de negocio CRUD (Funciones Request-Response)
-├── routes/
-│   └── itemRoutes.js          # Punto de anclaje de un enrutador Express a los endpoints (/api/components)
-├── utils/
-│   └── validators.js          # Helpers de validación para proteger el servidor
-└── public/                    # Vistas y estáticos del Frontend
-    ├── index.html             # UI de la Aplicación y Estructura Principal
-    ├── css/
-    │   └── style.css          # Reglas UI tipo "Glassmorphism", CSS Variables y Animaciones.
-    └── js/
-        └── main.js            # Frontend DOM API y lógica asíncrona ligada a los Endpoints.
+│   └── itemController.js      # Lógica CRUD compatible con campos bilingües
+├── public/                    # Frontend SPA
+│   ├── index.html             # UI con sistema de modales y contenedores bilingües
+│   ├── css/style.css          # Diseño premium, variables CSS y animaciones
+│   └── js/main.js             # Motor de traducción, gestión de DOM e i18n
+├── .nvmrc                     # Versión de Node.js fijada (v20)
+└── package.json               # Configuración de dependencias compatibles con Render (Linux)
 ```
 
 ---
 
-## ⚙️ Características y Lógica Destacada
+## 🗄️ Esquema de Datos (v2)
 
-### 1. Robustez del Backend (Sistema de Validaciones)
-El servidor jamás sucumbe ante inputs incorrectos del usuario. El código implementado en `utils/validators.js` inspecciona estrictamente:
-- **Campos en Blanco:** Se rechazan peticiones con espacios vacíos.
-- **Campos Negativos o Tipos Corruptos:** Las variables numéricas como inventario o precio son convertidas y sanitizadas.
-- **Reales vs Falsos (Hardware Exclusivo):** Existe un riguroso regex/control interno que verifica que el título contenga obligatoriamente una marca madre existente registrada en el espectro internacional de PC (ej. *Intel, AMD, NVIDIA, Corsair, ASUS, MSI, Gigabyte*, etc.), rechazando productos genéricos para garantizar la pureza del inventario.
+Tabla: `components`
 
-### 2. Auto-Populación Inteligente (Seeding)
-Para fines de prueba inmediatos, al detectar que la base de datos `inventory.db` es nueva o está vacía, `database.js` procede a insertar instantáneamente **100 artículos** configurados con precios e inventario verosímil y nombres técnicos aleatorios.
-
-### 3. Paginación y Filtrado del Client-Side
-Se aplican filtros instantáneos que no colapsan el servidor en cada escritura del usuario, debido a la delegación de búsquedas y paginado por bloques de 10 unidades completamente lideradas por JavaScript puro del Frontend, ofreciendo la experiencia de una verdadera Single-Page Application (SPA). Efectos de paginado fluidos integrados nativamente. 
-
-### 4. Estética de Diseño UX Premium (Glassmorphism + Dark Mode)
-En vez del clásico aspecto rústico y aburrido, la aplicación emplea componentes translúcidos (*backdrop-filter* de CSS) superpuestos sobre nodos de degradados radiales dinámicos. Las flechas nativas anti-estéticas de los inputs son eliminadas o sustituidas por iconos SVGs customizados en `style.css`. La barra lateral de formulario se ajusta contextualmente usando `align-self` y rastreo `sticky` para adherirse fluidamente a la parte superior cuando se hace scroll.
+| Columna | Tipo | Función |
+| :--- | :--- | :--- |
+| `id` | `INTEGER` | Clave primaria autoincremental |
+| `name` | `TEXT` | Nombre técnico verificado (Marca/Modelo) |
+| `category` | `TEXT` | Categoría de hardware (CPU, GPU, RAM, etc.) |
+| `quantity` | `INTEGER` | Nivel de stock actual |
+| `price` | `REAL` | Precio unitario en USD |
+| `description_en` | `TEXT` | Descripción extendida en Inglés |
+| `description_es` | `TEXT` | Descripción extendida en Español |
 
 ---
 
-## 🗄️ Esquema de la Base de Datos
+## 🚀 Despliegue en la Nube (Render.com)
 
-Tabla principal: `components`
+El proyecto está pre-configurado para desplegarse en Render en menos de 5 minutos:
 
-| Columna       | Tipo                            | Reglas                             |
-| ------------- |---------------------------------|----------------------------------- |
-| `id`          | `INTEGER`                       | `PRIMARY KEY AUTOINCREMENT`        |
-| `name`        | `TEXT`                          | `NOT NULL`                         |
-| `category`    | `TEXT`                          | `NOT NULL`                         |
-| `quantity`    | `INTEGER`                       | `DEFAULT 0`                        |
-| `price`       | `REAL`                          | `NOT NULL`                         |
-| `description` | `TEXT`                          | *(Opcional)*                       |
+1.  **Repo en GitHub:** Sube tu código (`git push origin main`).
+2.  **Web Service en Render:**
+    *   **Runtime:** `Node`
+    *   **Build Command:** `npm install`
+    *   **Start Command:** `npm start`
+3.  **Variables de Entorno (Settings):**
+    *   `NODE_VERSION`: `20`
+    *   `NODE_ENV`: `production`
 
 ---
 
-## 🚀 Despliegue Exitoso (Servidor Local)
+## 💻 Ejecución Local
+1. Instalar: `npm install`
+2. Ejecutar: `npm run dev`
+3. Acceder: `http://localhost:3000`
 
-Para arrancar esta aplicación en cualquier otra máquina desde cero o tras descargar su resguardo, los pasos son los siguientes:
-
-1. **Abre tu Terminal** (CMD, Powershell o Bash) ubicada dentro del directorio `INP`.
-2. **Descarga dependencias de NPM** (Express, SQLite, CORS):
-   ```bash
-   npm install
-   ```
-3. **Inicia del Servicio local:**
-   ```bash
-   npm run dev
-   ```
-   *(Observarás el Output de confirmación: `Server is running on http://localhost:3000` e imprimirá la confirmación de seeding local si es la primera vez).*
-4. Ingresa a tu navegador a través de **http://localhost:3000** y disfruta de la aplicación terminada.
+---
+**Desarrollado por Juan - Delta DevWeb S.A.D**
+*"Hardware management, redefined."*
